@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Syntasso C</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+        <!-- socket.io library -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+        <style>
+            #submit-form {
+                position: absolute;
+                left: 0;
+                width: 46%;
+                margin: 10px;
+            }
+            #code-editor {
+                height: 25em;
+                width: 100%;
+            }
+
+			#clearBtn {
+				position: absolute;
+				top: 10px;
+				right: 5px;
+			}
+
+            #stdout-container {
+				border: 1px solid slategrey;
+				border-radius: 5px;
+				position: absolute;
+				right: 0;
+				top: 40px;
+				width: 46%;
+				height: 100%;
+				margin: 10px;
+				padding: 10px;
+			}
+            
+            #dockerConfig {
+                height: 30px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <form id="submit-form">
+                <textarea id="code-editor"></textarea> <br />
+                <input placeholder="dockerConfig" id="dockerConfig" type="number"/>
+                <button id="runBtn">Run Code</button>
+            </form>
+			<div id="stdout-container-container">
+				<p id="stdout-container"></p>
+				<button id="clearBtn">Clear logs</button>
+			</div>
+
+        </div>
+        <!-- script to create socket connection -->
+        <script src="script.js"></script>
+    </body>
+</html>
