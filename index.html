@@ -40,13 +40,31 @@
                 height: 30px;
                 text-align: center;
             }
+
+            #addNewTestCaseBtn {
+                border-radius: 50%;
+                border: 1px solid slategray;
+                font-size: large;
+                margin: 4px 2px;
+            }
+
+            #addNewTestCaseBtn:hover {
+                border-radius: 50%;
+                border: 1px solid rgb(14, 106, 197);
+            }
         </style>
     </head>
     <body>
         <div id="container">
             <form id="submit-form">
                 <textarea id="code-editor"></textarea> <br />
-                <input placeholder="dockerConfig" id="dockerConfig" type="number"/>
+                <input placeholder="dockerConfig" id="dockerConfig" type="number"/> <br />
+                <span id="testCases">
+                    <input placeholder="sampleInput0" class="sampleInput" type="text">
+                    <input placeholder="expectedOutput0" class="expectedOutput" type="text">
+                    <br />
+                </span>
+                <button id="addNewTestCaseBtn">+</button>
                 <button id="runBtn">Run Code</button>
             </form>
 			<div id="stdout-container-container">
