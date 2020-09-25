@@ -1,27 +1,55 @@
-const socketConnection = io.connect('http://localhost:8081/');
-let socketId;
-socketConnection.on('connect', () => {
-	socketId = socketConnection.id;
-	console.log('socketId is: ' + socketId);
+let baseURL = document.getElementById("baseURLInput").value;
+let createConnectionBtn = document.getElementById("createConnectionBtn");
+
+let addNewTestCaseBtn = document.getElementById("addNewTestCaseBtn");
+let runBtn = document.getElementById("runBtn");
+let clearBtn = document.getElementById("clearBtn");
+let stdoutContainer = document.getElementById("stdout-container");
+
+let socketConnection, socketId;
+createConnectionBtn.addEventListener("click", (event) => {
+	event.preventDefault();
+	baseURL = document.getElementById("baseURLInput").value;
+	socketConnection = io.connect(baseURL);
+
+	socketConnection.on("connect", () => {
+		socketId = socketConnection.id;
+		console.log("socketId is: " + socketId);
+		runBtn.disabled = false;
+		clearBtn.disabled = false;
+	});
+
+	socketConnection.on("docker-app-stdout", (stdout) => {
+		stdoutContainer.innerHTML += stdout.stdout + "<br />";
+	});
+
+	socketConnection.on("test-status", (stdout) => {
+		console.dir({
+			message: "test-status-event",
+			...stdout,
+		});
+	});
+
+	socketConnection.on("container-id", (containerId) => {
+		console.log(containerId.containerId);
+	});
 });
 
-const codeEditor = document.getElementById('code-editor');
-const dockerConfigField = document.getElementById('dockerConfig');
-const addNewTestCaseBtn = document.getElementById('addNewTestCaseBtn');
-const runBtn = document.getElementById('runBtn');
-
-const clearBtn = document.getElementById("clearBtn");
-const stdoutContainer = document.getElementById('stdout-container');
-
-addNewTestCaseBtn.addEventListener('click', (event) => {
+addNewTestCaseBtn.addEventListener("click", (event) => {
 	// create two new input fields; one for sampleInput and the other for expectedOutput
 	event.preventDefault();
 	const sampleInputEl = document.createElement("input");
 	const expectedOutputEl = document.createElement("input");
 	sampleInputEl.setAttribute("class", "sampleInput");
 	expectedOutputEl.setAttribute("class", "expectedOutput");
-	sampleInputEl.setAttribute("placeholder", "sampleInput" + document.getElementsByClassName("sampleInput").length);
-	expectedOutputEl.setAttribute("placeholder", "expectedOutput" + document.getElementsByClassName("expectedOutput").length);
+	sampleInputEl.setAttribute(
+		"placeholder",
+		"sampleInput" + document.getElementsByClassName("sampleInput").length
+	);
+	expectedOutputEl.setAttribute(
+		"placeholder",
+		"expectedOutput" + document.getElementsByClassName("expectedOutput").length
+	);
 	sampleInputEl.type = "text";
 	expectedOutputEl.type = "text";
 
@@ -32,8 +60,11 @@ addNewTestCaseBtn.addEventListener('click', (event) => {
 	testCases.appendChild(document.createElement("br"));
 });
 
-runBtn.addEventListener('click', (event) => {
+runBtn.addEventListener("click", (event) => {
 	event.preventDefault();
+	let codeEditor = document.getElementById("code-editor");
+	let dockerConfigField = document.getElementById("dockerConfig");
+
 	const sampleInputs = Array.from(
 		document.getElementsByClassName("sampleInput")
 	);
@@ -49,54 +80,36 @@ runBtn.addEventListener('click', (event) => {
 		let expectedOutput = expectedOutputs[index];
 		testCases[index] = {
 			sampleInput: sampleInput.value ? sampleInput.value : 0,
-			expectedOutput: expectedOutput.value ? expectedOutput.value : 0
+			expectedOutput: expectedOutput.value ? expectedOutput.value : 0,
 		};
-	})
+	});
 	const payload = {
-		"code": `${code}`,
-		"socketId": `${socketId}`,
-		"dockerConfig": `${dockerConfig}`,
-		"testCases": testCases
-	}
-	console.dir({testCases, payload, sampleInputs, expectedOutputs})
-	if (code && code.trim() !== '') {
+		code: `${code}`,
+		socketId: `${socketId}`,
+		dockerConfig: `${dockerConfig}`,
+		testCases: testCases,
+	};
+	console.dir({ baseURL, testCases, payload, sampleInputs, expectedOutputs });
+	if (code && code.trim() !== "") {
 		try {
-			fetch('http://localhost:8081/submit', {
-				method: 'POST',
+			fetch(`${baseURL}/submit`, {
+				method: "POST",
 
 				body: JSON.stringify(payload),
 				headers: {
-					'content-type': 'application/json'
+					"content-type": "application/json",
 				},
-				credentials: 'include',
 			})
-				.then(response => {
+				.then((response) => {
 					return response.json();
 				})
-				.then(res => console.log(res))
+				.then((res) => console.log(res));
 		} catch (err) {
 			console.err(err);
 		}
 	}
 });
 
-clearBtn.addEventListener('click', event => {
+clearBtn.addEventListener("click", (event) => {
 	stdoutContainer.innerHTML = "";
-});
-
-
-socketConnection.on('docker-app-stdout', stdout => {
-	stdoutContainer.innerHTML += stdout.stdout + '<br />';
-});
-
-
-socketConnection.on('test-status', stdout => {
-	console.dir({
-		message: "test-status-event",
-		...stdout
-	});
-});
-
-socketConnection.on('container-id', containerId => {
-	console.log(containerId.containerId);
 });
